@@ -1,0 +1,48 @@
+mode: test
+
+paths:
+  raw_data: data/raw/adas_phantom_braking_dataset_50k.csv
+  model_output: models/best_model.pkl
+  log_file: logs/pipeline.log
+
+data:
+  target_column: real_obstacle       # Name of the label column in the dataset (binary: 1=real, 0=phantom)
+  test_size: 0.2                     # 20% of data reserved for testing, 80% used for training
+  random_state: 42                   # Seed for reproducibility across splits and model runs
+
+model:
+  selected_model: xgboost            # Active model to use; must match a key under `models`
+
+models:
+  xgboost:
+    n_estimators: 300                # Number of boosting rounds (trees); higher = more capacity but slower
+    max_depth: 6                     # Maximum depth of each tree; controls complexity and overfitting
+    learning_rate: 0.1               # Step size shrinkage per round; lower = more conservative learning
+
+# prediction input
+input_features:
+  radar_distance: 12                 # Distance to detected object from radar (meters)
+  relative_velocity: -5              # Speed of object relative to ego vehicle (m/s); negative = approaching
+  radar_angle: 1.2                   # Horizontal angle of radar return (degrees or radians)
+  radar_rcs: 0.8                     # Radar Cross Section — reflectivity of the object; low = possibly phantom
+  object_persistence: 15             # Number of consecutive frames the object has been tracked
+
+  camera_confidence: 0.9             # Vision model confidence score for object classification (0–1)
+  object_type: 1                     # Encoded class label (e.g. 0=unknown, 1=vehicle, 2=pedestrian)
+  bbox_area: 1500                    # Bounding box pixel area from camera; proxy for object size/distance
+
+  lidar_density: 0.8                 # Point cloud density in the object region; low = sparse/uncertain detection
+
+  ego_speed: 60                      # Current speed of the ego vehicle (km/h or m/s per pipeline convention)
+  ego_acceleration: -1               # Longitudinal acceleration of ego vehicle (m/s²); negative = decelerating
+  steering_angle: 0.2                # Current steering wheel angle (radians); non-zero = turning
+
+  time_to_collision: 1.4             # Estimated seconds until impact at current velocities (TTC)
+  lane_overlap: 0.9                  # Fraction of object bounding box overlapping ego lane (0–1)
+
+  trajectory_smoothness: 0.85        # Consistency of the object's tracked path; low = erratic/phantom-like
+
+  sensor_agreement: 0.9              # Cross-sensor fusion score; how well radar, camera & lidar agree (0–1)
+
+  rain_intensity: 0.1                # Precipitation level affecting sensor noise (0=clear, 1=heavy rain)
+  lighting_level: 0.8                # Ambient light quality (0=darkness, 1=full daylight)
