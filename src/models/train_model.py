@@ -12,12 +12,14 @@ def train_model(X, y, config):
     )
     model_name = config["model"]["selected_model"]
     model_params = config["models"]
+
     if model_name == "random_forest":
         params = model_params["random_forest"]
         model = RandomForestClassifier(
             n_estimators=params["n_estimators"],
             max_depth=params["max_depth"]
         )
+
     elif model_name == "xgboost":
         params = model_params["xgboost"]
         model = XGBClassifier(
@@ -25,6 +27,7 @@ def train_model(X, y, config):
             max_depth=params["max_depth"],
             learning_rate=params["learning_rate"]
         )
+        
     elif model_name == "logistic_regression":
         params = model_params["logistic_regression"]
         model = LogisticRegression(

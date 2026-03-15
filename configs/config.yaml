@@ -1,4 +1,4 @@
-mode: test
+mode: train
 
 paths:
   raw_data: data/raw/adas_phantom_braking_dataset_50k.csv
@@ -11,13 +11,28 @@ data:
   random_state: 42                   # Seed for reproducibility across splits and model runs
 
 model:
-  selected_model: xgboost            # Active model to use; must match a key under `models`
+  selected_model: logistic_regression            # Active model to use; must match a key under `models`
 
 models:
   xgboost:
     n_estimators: 300                # Number of boosting rounds (trees); higher = more capacity but slower
     max_depth: 6                     # Maximum depth of each tree; controls complexity and overfitting
     learning_rate: 0.1               # Step size shrinkage per round; lower = more conservative learning
+
+  logistic_regression:
+    C: 1.0                          # Inverse of regularization strength; smaller = stronger regularization
+    solver: liblinear                # Algorithm to use in the optimization problem; good for small datasets
+    max_iter: 1000                     # Maximum number of iterations for convergence; increase if model fails to converge
+
+  random_forest:
+    n_estimators: 200                # Number of trees in the forest; more trees can improve performance but increase training time
+    max_depth: 10                    # Maximum depth of each tree; controls overfitting
+    min_samples_split: 5             # Minimum number of samples required to split an internal node; higher = more conservative splits
+
+  decision_tree:
+    max_depth: 8                     # Maximum depth of the tree; controls overfitting
+    min_samples_split: 10            # Minimum number of samples required to split an internal node; higher = more conservative splits
+
 
 # prediction input
 input_features:
